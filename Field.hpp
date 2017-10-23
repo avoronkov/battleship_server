@@ -17,6 +17,8 @@ public:
 
 	void put(std::ostream & out) const;
 	void read(std::istream & in);
+
+	static const size_t SIZE = 10;
 };
 
 std::ostream& operator<<(std::ostream& out, const Field &);

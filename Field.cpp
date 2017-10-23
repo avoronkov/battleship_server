@@ -2,12 +2,10 @@
 #include <stdexcept>
 #include <sstream>
 
-const size_t FIELD_SIZE = 10;
-
 Field::Field() {
-	field.resize(FIELD_SIZE);
+	field.resize(Field::SIZE);
 	for (auto & line : field) {
-		line.resize(FIELD_SIZE);
+		line.resize(Field::SIZE);
 		for (auto & cell : line) {
 			cell = Cell::EMPTY;
 		}
@@ -32,17 +30,17 @@ void Field::put(std::ostream & out) const {
 }
 
 void Field::read(std::istream & in) {
-	for (size_t i = 0; i < FIELD_SIZE; i++) {
+	for (size_t i = 0; i < Field::SIZE; i++) {
 		std::string line;
 		std::getline(in, line);
 
-		if (line.size() < FIELD_SIZE) {
+		if (line.size() < Field::SIZE) {
 			std::stringstream err("Line is too short: ");
 			err << line;
 			throw std::runtime_error(err.str());
 		}
 		std::stringstream str(line);
-		for (size_t j = 0; j < FIELD_SIZE; j++) {
+		for (size_t j = 0; j < Field::SIZE; j++) {
 			Cell c;
 			str >> c;
 			field.at(i).at(j) = c;

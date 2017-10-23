@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <utility>
 #include "boost/process.hpp"
 
 #include "Field.hpp"
@@ -22,4 +23,7 @@ public:
 
 	Field initField();
 
+	void shootCmd();
+
+	std::pair<int, int> getShot();
 };
