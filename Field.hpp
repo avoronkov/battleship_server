@@ -10,6 +10,8 @@ private:
 	std::vector<std::vector<Cell>> field;
 public:
 	Field();
+	Field(const Field &) = default;
+	Field& operator=(const Field &) = default;
 	~Field() = default;
 
 	void setCell(int x, int y, Cell c);

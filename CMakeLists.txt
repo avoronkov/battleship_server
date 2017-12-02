@@ -7,7 +7,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 include_directories(".")
 
-set(SOURCE_FILES main.cpp Player.cpp Field.cpp Cell.cpp)
+set(SOURCE_FILES main.cpp Game.cpp Player.cpp Field.cpp Cell.cpp)
 add_executable(battleship_server ${SOURCE_FILES})
 
 target_link_libraries(battleship_server ${Boost_LIBRARIES})

@@ -1,14 +1,13 @@
 #include <iostream>
 
-#include "Player.hpp"
+#include "Game.hpp"
 
 int main(int argc, char **argv) {
-	if (argc < 2) {
-		std::cerr << "Usage: <prog1> ..." << std::endl;
+	if (argc < 3) {
+		std::cerr << "Usage: <prog1> <prog2> ..." << std::endl;
 		return 2;
 	}
 
-	Player p1(argv[1]);
-	Field f = p1.initField();
-	std::cout << "Player 1 filed:\n" << f << std::endl;
+	Game game(argv[1], argv[2]);
+	game.start();
 }
