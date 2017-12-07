@@ -1,6 +1,10 @@
 #include "Field.hpp"
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
+#include <boost/algorithm/string.hpp>
+
+using std::cerr;
 
 Field::Field() {
 	field.resize(Field::SIZE);
@@ -30,9 +34,15 @@ void Field::put(std::ostream & out) const {
 }
 
 void Field::read(std::istream & in) {
-	for (size_t i = 0; i < Field::SIZE; i++) {
+	cerr << "Field::read\n";
+	for (size_t i = 0; i < Field::SIZE;) {
 		std::string line;
 		std::getline(in, line);
+		boost::trim(line);
+
+		if ("" == line) {
+			continue;
+		}
 
 		if (line.size() < Field::SIZE) {
 			std::stringstream err("Line is too short: ");
@@ -45,6 +55,7 @@ void Field::read(std::istream & in) {
 			str >> c;
 			field.at(i).at(j) = c;
 		}
+		i++;
 	}
 }
 

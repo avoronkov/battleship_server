@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 
 #include "Game.hpp"
 
@@ -8,6 +9,12 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
-	Game game(argv[1], argv[2]);
-	game.start();
+	try {
+		Game game(argv[1], argv[2]);
+		game.start();
+	}
+	catch (const std::exception & e) {
+		std::cerr << e.what() << std::endl;
+		return 1;
+	}
 }

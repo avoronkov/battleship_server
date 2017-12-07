@@ -14,8 +14,9 @@ private:
 	boost::process::ipstream out;
 
 	std::unique_ptr<boost::process::child> ch;
+	std::string name;
 public:
-	Player(const std::string & prog);
+	Player(const std::string & name, const std::string & prog);
 	Player(const Player &) = delete;
 	~Player() = default;
 
