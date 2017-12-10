@@ -1,5 +1,11 @@
 # Battleship server.
 
-## Dependencies.
+## How-to
 
-Boost.Process sourses are taken from git@github.com:klemens-morgenstern/boost-process.git
+- Install go compiler.
+
+- (Set up `$GOPATH`)
+
+- `cd battleship_server`
+
+- `go build`
