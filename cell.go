@@ -1,6 +1,9 @@
 package main
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 type cell int
 
@@ -11,21 +14,6 @@ const (
 	HIT   cell = 4
 	KILL  cell = 5
 )
-
-func (c cell) String() string {
-	switch c {
-	case EMPTY:
-		return "."
-	case SHIP:
-		return "#"
-	case MISS:
-		return "O"
-	case HIT, KILL:
-		return "X"
-	default:
-		return "?"
-	}
-}
 
 func RuneToCell(c byte) cell {
 	switch c {
@@ -38,7 +26,7 @@ func RuneToCell(c byte) cell {
 	case 'X':
 		return HIT
 	default:
-		panic("Unknown char")
+		panic(fmt.Errorf("Unknown char: %c", c))
 	}
 
 }
@@ -58,6 +46,6 @@ func ReadCell(r io.Reader) cell {
 	case 'X':
 		return HIT
 	default:
-		panic("Unknown char")
+		panic(fmt.Errorf("Unknown char: %c", buf[0]))
 	}
 }

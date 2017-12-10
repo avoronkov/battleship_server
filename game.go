@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"path"
 	"time"
 )
@@ -19,6 +20,7 @@ type Game struct {
 func NewGame(exe1, exe2 string) *Game {
 	g := new(Game)
 	g.p1 = NewPlayer(path.Base(exe1), exe1)
+	time.Sleep(2 * time.Second)
 	g.p2 = NewPlayer(path.Base(exe2), exe2)
 	g.StatusPipe = make(chan StatusMessage)
 	g.Sleep = 300 * time.Millisecond
@@ -62,7 +64,13 @@ L:
 	for {
 		time.Sleep(g.Sleep)
 		g.StatusPipe <- wait
-		shot := currentPlayer.GetShot()
+		shot, e := currentPlayer.GetShot()
+		if e != nil {
+			g.Winner = anotherPlayer.Name()
+			g.Error = e
+			g.StatusPipe <- Finish
+			return
+		}
 		result, e := anotherField.Shoot(*shot)
 		if e != nil {
 			g.Winner = anotherPlayer.Name()
@@ -70,6 +78,7 @@ L:
 			g.StatusPipe <- Finish
 			return
 		}
+		log.Printf("shoot result: %s", result)
 		fmt.Println(DisplayFields(g.p1.Name(), g.p2.Name(), f1, f2))
 		if anotherField.StillAlive() == 0 {
 			// Win!

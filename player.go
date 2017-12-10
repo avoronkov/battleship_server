@@ -45,11 +45,11 @@ func (p *Player) ShootCmd() {
 	io.WriteString(p.in, "Shoot!\n")
 }
 
-func (p *Player) GetShot() *Shot {
+func (p *Player) GetShot() (*Shot, error) {
 	log.Printf("[%s] GetShot\n", p.name)
-	shot := ReadShot(p.out)
-	log.Printf("[%s] GetShot: %s", p.name, *shot)
-	return shot
+	shot, err := ReadShot(p.out)
+	log.Printf("[%s] GetShot: %s (%s)", p.name, shot, err)
+	return shot, err
 }
 
 func (p *Player) SendResult(c cell) {
@@ -87,8 +87,8 @@ func (p *Player) Close() (err error) {
 	if err = p.in.Close(); err != nil {
 		return
 	}
-	err = p.out.Close()
-	p.exe.Wait()
-	log.Printf("[%s] Ok", p.name)
+	p.out.Close()
+	e := p.exe.Wait()
+	log.Printf("[%s] Closed (%s)", p.name, e)
 	return
 }
