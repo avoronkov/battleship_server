@@ -1,6 +1,6 @@
-package main
+package cell
 
-func (c cell) String() string {
+func (c Cell) String() string {
 	switch c {
 	case EMPTY:
 		return "."

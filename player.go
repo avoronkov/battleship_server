@@ -1,6 +1,10 @@
 package main
 
 import (
+	"battleship_server/cell"
+	"battleship_server/field"
+	bio "battleship_server/io"
+	"battleship_server/shot"
 	"fmt"
 	"io"
 	"log"
@@ -33,9 +37,9 @@ func NewPlayer(name, executable string) *Player {
 	return p
 }
 
-func (p *Player) InitField() *Field {
+func (p *Player) InitField() *field.Field {
 	io.WriteString(p.in, "Arrange!\n")
-	f := ReadField(p.out)
+	f := bio.ReadField(p.out)
 	log.Printf("[%s] InitField:\n%s\n", p.name, f)
 	return f
 }
@@ -45,27 +49,27 @@ func (p *Player) ShootCmd() {
 	io.WriteString(p.in, "Shoot!\n")
 }
 
-func (p *Player) GetShot() (*Shot, error) {
+func (p *Player) GetShot() (*shot.Shot, error) {
 	log.Printf("[%s] GetShot\n", p.name)
-	shot, err := ReadShot(p.out)
+	shot, err := bio.ReadShot(p.out)
 	log.Printf("[%s] GetShot: %s (%s)", p.name, shot, err)
 	return shot, err
 }
 
-func (p *Player) SendResult(c cell) {
+func (p *Player) SendResult(c cell.Cell) {
 	switch c {
-	case MISS:
+	case cell.MISS:
 		io.WriteString(p.in, "Miss\n")
-	case HIT:
+	case cell.HIT:
 		io.WriteString(p.in, "Hit\n")
-	case KILL:
+	case cell.KILL:
 		io.WriteString(p.in, "Kill\n")
 	default:
 		panic(fmt.Errorf("Unexpected result: %s", c))
 	}
 }
 
-func (p *Player) EnemyShootedInto(s Shot) {
+func (p *Player) EnemyShootedInto(s shot.Shot) {
 	fmt.Fprintf(p.in, "Enemy shooted into %s", s)
 }
 

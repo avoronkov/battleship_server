@@ -6,6 +6,8 @@ import (
 	"log"
 	"path"
 	"time"
+	"battleship_server/cell"
+	"battleship_server/field"
 )
 
 type Game struct {
@@ -36,13 +38,13 @@ func (g *Game) Close() error {
 func (g *Game) Run() {
 	f1 := g.p1.InitField()
 	f2 := g.p2.InitField()
-	if err := checkField(f1); err != nil {
+	if err := f1.Check(); err != nil {
 		g.Error = err
 		g.Winner = g.Player2()
 		g.StatusPipe <- Finish
 		return
 	}
-	if err := checkField(f2); err != nil {
+	if err := f2.Check(); err != nil {
 		g.Error = err
 		g.Winner = g.Player1()
 		g.StatusPipe <- Finish
@@ -90,9 +92,9 @@ L:
 		}
 		currentPlayer.SendResult(result)
 		switch result {
-		case HIT, KILL:
+		case cell.HIT, cell.KILL:
 			continue L
-		case MISS:
+		case cell.MISS:
 			// switch players
 			currentPlayer, anotherPlayer = anotherPlayer, currentPlayer
 			currentField, anotherField = anotherField, currentField
@@ -115,16 +117,12 @@ func (g Game) Player2() string {
 	return fmt.Sprintf("%s (2)", g.p2.Name())
 }
 
-func checkField(f *Field) error {
-	return nil
-}
-
-func DisplayFields(name1, name2 string, f1, f2 *Field) string {
+func DisplayFields(name1, name2 string, f1, f2 *field.Field) string {
 	var buff bytes.Buffer
 	// TODO
 	fmt.Fprintf(&buff, "\033[H\033[2J")
 	fmt.Fprintf(&buff, "\n%s: %s:\n", name1, name2)
-	for l := 0; l < FIELD_SIZE; l++ {
+	for l := 0; l < field.FIELD_SIZE; l++ {
 		fmt.Fprintf(&buff, "%s    %s\n", f1.LineString(l), f2.LineString(l))
 	}
 	fmt.Fprintf(&buff, "        %2d    %2d\n", f1.StillAlive(), f2.StillAlive())
