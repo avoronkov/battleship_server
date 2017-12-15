@@ -5,6 +5,7 @@ import (
 	"battleship_server/shot"
 	"bytes"
 	"fmt"
+	"log"
 )
 
 const FIELD_SIZE = 10
@@ -24,11 +25,12 @@ func (f *Field) Shoot(s shot.Shot) (cell.Cell, error) {
 		f.field[s.Y][s.X] = cell.MISS
 		return cell.MISS, nil
 	case cell.SHIP:
+		log.Printf("f.field[%d][%d]", s.Y, s.X)
 		f.field[s.Y][s.X] = cell.HIT
 		if f.killed(s.X, s.Y) {
-			return cell.HIT, nil
-		} else {
 			return cell.KILL, nil
+		} else {
+			return cell.HIT, nil
 		}
 		return cell.HIT, nil
 	default:
@@ -50,6 +52,7 @@ L:
 		}
 		checked_cells = append(checked_cells, c)
 		if c.X > 0 {
+			log.Printf("check1 %d %d", c.Y, c.X-1)
 			st := f.field[c.Y][c.X-1]
 			if st == cell.SHIP {
 				return false
@@ -59,6 +62,7 @@ L:
 			}
 		}
 		if c.X < FIELD_SIZE-1 {
+			log.Printf("check2 %d %d", c.Y, c.X+1)
 			st := f.field[c.Y][c.X+1]
 			if st == cell.SHIP {
 				return false
@@ -68,6 +72,7 @@ L:
 			}
 		}
 		if c.Y > 0 {
+			log.Printf("check3 %d %d", c.Y-1, c.X)
 			st := f.field[c.Y-1][c.X]
 			if st == cell.SHIP {
 				return false
@@ -77,12 +82,13 @@ L:
 			}
 		}
 		if c.Y < FIELD_SIZE-1 {
+			log.Printf("check4 %d %d", c.Y+1, c.X)
 			st := f.field[c.Y+1][c.X]
 			if st == cell.SHIP {
 				return false
 			}
 			if st == cell.HIT {
-				cells = append(cells, shot.Shot{c.X, c.Y - 1})
+				cells = append(cells, shot.Shot{c.X, c.Y + 1})
 			}
 		}
 	}
