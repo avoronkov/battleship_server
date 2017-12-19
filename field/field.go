@@ -26,11 +26,9 @@ func (f *Field) Shoot(s shot.Shot) (cell.Cell, error) {
 		return cell.MISS, nil
 	case cell.SHIP:
 		log.Printf("f.field[%d][%d]", s.Y, s.X)
-		f.field[s.Y][s.X] = cell.HIT
+		f.field[s.Y][s.X] = cell.KILL
 		if f.killed(s.X, s.Y) {
 			return cell.KILL, nil
-		} else {
-			return cell.HIT, nil
 		}
 		return cell.HIT, nil
 	default:
@@ -57,7 +55,7 @@ L:
 			if st == cell.SHIP {
 				return false
 			}
-			if st == cell.HIT {
+			if st == cell.KILL {
 				cells = append(cells, shot.Shot{c.X - 1, c.Y})
 			}
 		}
@@ -67,7 +65,7 @@ L:
 			if st == cell.SHIP {
 				return false
 			}
-			if st == cell.HIT {
+			if st == cell.KILL {
 				cells = append(cells, shot.Shot{c.X + 1, c.Y})
 			}
 		}
@@ -77,7 +75,7 @@ L:
 			if st == cell.SHIP {
 				return false
 			}
-			if st == cell.HIT {
+			if st == cell.KILL {
 				cells = append(cells, shot.Shot{c.X, c.Y - 1})
 			}
 		}
@@ -87,7 +85,7 @@ L:
 			if st == cell.SHIP {
 				return false
 			}
-			if st == cell.HIT {
+			if st == cell.KILL {
 				cells = append(cells, shot.Shot{c.X, c.Y + 1})
 			}
 		}

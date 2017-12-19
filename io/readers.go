@@ -1,14 +1,14 @@
 package io
 
 import (
+	"battleship_server/cell"
+	"battleship_server/field"
+	"battleship_server/shot"
 	"bufio"
 	"fmt"
 	"io"
 	"log"
 	"strings"
-	"battleship_server/cell"
-	"battleship_server/field"
-	"battleship_server/shot"
 )
 
 func ReadCell(r io.Reader) cell.Cell {
@@ -30,14 +30,14 @@ func ReadCell(r io.Reader) cell.Cell {
 	}
 }
 
-func ReadField(r io.Reader) *field.Field {
+func ReadField(r io.Reader) (*field.Field, error) {
 	f := new(field.Field)
 	log.Printf("readField from %s", r)
 	y := 0
 	sc := bufio.NewScanner(r)
 	for y < field.FIELD_SIZE {
 		if !sc.Scan() {
-			panic("No more lines")
+			return nil, fmt.Errorf("Stream is closed whire reading field")
 		}
 		line := strings.Trim(sc.Text(), " \n\t")
 		if line == "" {
@@ -51,7 +51,7 @@ func ReadField(r io.Reader) *field.Field {
 		}
 		y++
 	}
-	return f
+	return f, nil
 }
 
 func ReadShot(r io.Reader) (*shot.Shot, error) {
@@ -73,4 +73,3 @@ func ReadShot(r io.Reader) (*shot.Shot, error) {
 	}
 	return &shot.Shot{x, y}, nil
 }
-

@@ -1,13 +1,13 @@
 package main
 
 import (
+	"battleship_server/cell"
+	"battleship_server/field"
 	"bytes"
 	"fmt"
 	"log"
 	"path"
 	"time"
-	"battleship_server/cell"
-	"battleship_server/field"
 )
 
 type Game struct {
@@ -21,9 +21,9 @@ type Game struct {
 
 func NewGame(exe1, exe2 string) *Game {
 	g := new(Game)
-	g.p1 = NewPlayer(path.Base(exe1), exe1)
+	g.p1 = NewPlayer(path.Base(exe1)+" (1)", exe1)
 	time.Sleep(2 * time.Second)
-	g.p2 = NewPlayer(path.Base(exe2), exe2)
+	g.p2 = NewPlayer(path.Base(exe2)+" (2)", exe2)
 	g.StatusPipe = make(chan StatusMessage)
 	g.Sleep = 300 * time.Millisecond
 	return g
@@ -36,18 +36,20 @@ func (g *Game) Close() error {
 }
 
 func (g *Game) Run() {
-	f1 := g.p1.InitField()
-	f2 := g.p2.InitField()
-	if err := f1.Check(); err != nil {
-		g.Error = err
-		g.Winner = g.Player2()
-		g.StatusPipe <- Finish
+	f1, e1 := g.p1.InitField()
+	if e1 == nil {
+		e1 = f1.Check()
+	}
+	if e1 != nil {
+		g.finish(g.p2, g.p1, e1)
 		return
 	}
-	if err := f2.Check(); err != nil {
-		g.Error = err
-		g.Winner = g.Player1()
-		g.StatusPipe <- Finish
+	f2, e2 := g.p2.InitField()
+	if e2 == nil {
+		e2 = f2.Check()
+	}
+	if e2 != nil {
+		g.finish(g.p1, g.p2, e2)
 		return
 	}
 
@@ -68,26 +70,19 @@ L:
 		g.StatusPipe <- wait
 		shot, e := currentPlayer.GetShot()
 		if e != nil {
-			g.Winner = anotherPlayer.Name()
-			g.Error = e
-			g.StatusPipe <- Finish
+			g.finish(anotherPlayer, currentPlayer, e)
 			return
 		}
 		result, e := anotherField.Shoot(*shot)
 		if e != nil {
-			g.Winner = anotherPlayer.Name()
-			g.Error = e
-			g.StatusPipe <- Finish
+			g.finish(anotherPlayer, currentPlayer, e)
 			return
 		}
 		log.Printf("shoot result: %s", result)
 		fmt.Println(DisplayFields(g.p1.Name(), g.p2.Name(), f1, f2))
 		if anotherField.StillAlive() == 0 {
 			// Win!
-			currentPlayer.Win()
-			anotherPlayer.Lose()
-			g.Winner = currentPlayer.Name()
-			g.StatusPipe <- Finish
+			g.finish(currentPlayer, anotherPlayer, nil)
 			return
 		}
 		currentPlayer.SendResult(result)
@@ -110,11 +105,19 @@ L:
 }
 
 func (g Game) Player1() string {
-	return fmt.Sprintf("%s (1)", g.p1.Name())
+	return g.p1.Name()
 }
 
 func (g Game) Player2() string {
-	return fmt.Sprintf("%s (2)", g.p2.Name())
+	return g.p2.Name()
+}
+
+func (g *Game) finish(winner, loser *Player, err error) {
+	winner.Win()
+	loser.Lose()
+	g.Winner = winner.Name()
+	g.Error = err
+	g.StatusPipe <- Finish
 }
 
 func DisplayFields(name1, name2 string, f1, f2 *field.Field) string {

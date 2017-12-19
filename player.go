@@ -37,11 +37,11 @@ func NewPlayer(name, executable string) *Player {
 	return p
 }
 
-func (p *Player) InitField() *field.Field {
+func (p *Player) InitField() (*field.Field, error) {
 	io.WriteString(p.in, "Arrange!\n")
-	f := bio.ReadField(p.out)
-	log.Printf("[%s] InitField:\n%s\n", p.name, f)
-	return f
+	f, err := bio.ReadField(p.out)
+	log.Printf("[%s] InitField:\n%s\n(%v)", p.name, f, err)
+	return f, err
 }
 
 func (p *Player) ShootCmd() {
