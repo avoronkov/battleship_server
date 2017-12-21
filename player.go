@@ -12,14 +12,23 @@ import (
 	"os/exec"
 )
 
+type PlayerName struct {
+	Name string
+	N    int
+}
+
+func (pn PlayerName) String() string {
+	return fmt.Sprintf("%s (%d)", pn.Name, pn.N)
+}
+
 type Player struct {
 	exe  *exec.Cmd
-	name string
+	name PlayerName
 	in   io.WriteCloser
 	out  io.ReadCloser
 }
 
-func NewPlayer(name, executable string) *Player {
+func NewPlayer(name PlayerName, executable string) *Player {
 	p := new(Player)
 	p.name = name
 	p.exe = exec.Command(executable)
@@ -82,7 +91,7 @@ func (p *Player) Lose() {
 	io.WriteString(p.in, "Lose\n")
 }
 
-func (p Player) Name() string {
+func (p Player) Name() PlayerName {
 	return p.name
 }
 

@@ -15,15 +15,17 @@ type Game struct {
 	p2         *Player
 	Sleep      time.Duration
 	StatusPipe chan StatusMessage
-	Winner     string
+	Winner     PlayerName
 	Error      error
 }
 
 func NewGame(exe1, exe2 string) *Game {
 	g := new(Game)
-	g.p1 = NewPlayer(path.Base(exe1)+" (1)", exe1)
+	pn1 := PlayerName{path.Base(exe1), 1}
+	g.p1 = NewPlayer(pn1, exe1)
 	time.Sleep(2 * time.Second)
-	g.p2 = NewPlayer(path.Base(exe2)+" (2)", exe2)
+	pn2 := PlayerName{path.Base(exe2), 2}
+	g.p2 = NewPlayer(pn2, exe2)
 	g.StatusPipe = make(chan StatusMessage)
 	g.Sleep = 300 * time.Millisecond
 	return g
@@ -60,7 +62,7 @@ func (g *Game) Run() {
 
 	currentPlayer.ShootCmd()
 
-	fmt.Println(DisplayFields(g.p1.Name(), g.p2.Name(), f1, f2))
+	fmt.Println(DisplayFields(g.p1.Name().Name, g.p2.Name().Name, f1, f2))
 
 	wait := WaitP1
 
@@ -79,7 +81,7 @@ L:
 			return
 		}
 		log.Printf("shoot result: %s", result)
-		fmt.Println(DisplayFields(g.p1.Name(), g.p2.Name(), f1, f2))
+		fmt.Println(DisplayFields(g.p1.Name().Name, g.p2.Name().Name, f1, f2))
 		if anotherField.StillAlive() == 0 {
 			// Win!
 			g.finish(currentPlayer, anotherPlayer, nil)
@@ -104,11 +106,11 @@ L:
 	}
 }
 
-func (g Game) Player1() string {
+func (g Game) Player1() PlayerName {
 	return g.p1.Name()
 }
 
-func (g Game) Player2() string {
+func (g Game) Player2() PlayerName {
 	return g.p2.Name()
 }
 
@@ -130,4 +132,39 @@ func DisplayFields(name1, name2 string, f1, f2 *field.Field) string {
 	}
 	fmt.Fprintf(&buff, "        %2d    %2d\n", f1.StillAlive(), f2.StillAlive())
 	return buff.String()
+}
+
+func Play(player1, player2 string) (winner PlayerName, err error) {
+	game := NewGame(player1, player2)
+	game.Sleep = *sleep
+
+	defer game.Close()
+	go game.Run()
+
+	status := Unknown
+
+L:
+	for {
+		select {
+		case status = <-game.StatusPipe:
+			log.Printf("Status = %d", status)
+			if status == Finish {
+				winner = game.Winner
+				err = game.Error
+				break L
+			}
+		case <-time.After(3 * time.Second):
+			if status == WaitP1 {
+				winner = game.Player2()
+				err = fmt.Errorf("%s timeout", game.Player1())
+			} else if status == WaitP2 {
+				winner = game.Player1()
+				err = fmt.Errorf("%s timeout", game.Player2())
+			} else {
+				err = fmt.Errorf("Unknown timeout")
+			}
+			break L
+		}
+	}
+	return
 }
