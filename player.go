@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
 )
 
 type PlayerName struct {
@@ -101,7 +102,10 @@ func (p *Player) Close() (err error) {
 		return
 	}
 	p.out.Close()
-	e := p.exe.Wait()
-	log.Printf("[%s] Closed (%s)", p.name, e)
+	go func() {
+		time.AfterFunc(3*time.Second, func() { p.exe.Process.Kill() })
+		e := p.exe.Wait()
+		log.Printf("[%s] Closed (%s)", p.name, e)
+	}()
 	return
 }
